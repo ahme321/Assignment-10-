@@ -1,0 +1,16 @@
+scrape_configs:
+  - job_name: 'notification_service'
+    static_configs:
+      - targets: ['notification_service:YOUR_METRICS_PORT'] 
+
+    groups:
+  - name: notification_service_alerts
+    rules:
+      - alert: HighNotificationErrorRate
+        expr: sum(rate(notification_errors_total[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate in Notification Service"
+          description: "The Notification Service is experiencing an error rate of {{ $value }} errors per minute"  

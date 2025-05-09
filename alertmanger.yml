@@ -1,0 +1,17 @@
+global:
+  smtp_smarthost: 'smtp.YOUR_SMTP_SERVER:YOUR_SMTP_PORT' 
+  smtp_auth_username: 'YOUR_EMAIL_ADDRESS'
+  smtp_auth_password: 'YOUR_EMAIL_PASSWORD'
+  smtp_from: 'alertmanager@example.com'
+  smtp_require_tls: true 
+
+route:
+  receiver: 'email-notifications'
+
+receivers:
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'YOUR_RECIPIENT_EMAIL'
+        subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.job }} / {{ .GroupLabels.instance }}: {{ .CommonAnnotations.summary }}'
+        html: '{{ template "email.html" . }}'
+        send_resolved: true

@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  app: 
+    image: your_app_image:latest
+    networks:
+      - my_network
+  node_exporter:
+    image: prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    networks:
+      - my_network
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - my_network
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - my_network
+  notification_service:
+    image: your_notification_service:latest
+    ports:
+      - "8080:8080" 
+      - "8081:8081" 
+    networks:
+      - my_network
+networks:
+  my_network:
+   driver: bridge
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s 
+
+scrape_configs:
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100'] 
+  - job_name: 'notification_service'
+    static_configs:
+      - targets: ['notification_service:8081'] 
+  - job_name: 'my_microservice_1'
+    static_configs:
+      - targets: ['my_microservice_1:8080']  
+  - job_name: 'my_microservice_2'
+    static_configs:
+    targets: ['my_microservice_2:8080']
+
+alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - my_network
+    depends_on:
+      - prometheus
+
+
+
+
+
